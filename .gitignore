@@ -9,3 +9,6 @@ dist/
 # Generated Prisma clients (regenerate with `npm run db:generate`) — includes
 # platform-specific binary query engines that shouldn't be committed.
 apps/backend/src/generated/
+
+# Next.js build artifacts
+*.tsbuildinfo
