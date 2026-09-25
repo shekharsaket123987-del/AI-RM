@@ -1,0 +1,88 @@
+// "AI zone" — PRD section 20. The only store the AI ever writes to.
+// Stands in for the Postgres AI-zone database described in section 22.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/aizoneClient"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL_AIZONE")
+}
+
+model Conversation {
+  id         String   @id @default(cuid())
+  clientId   String
+  direction  String   // inbound | outbound
+  message    String
+  intent     String?
+  level      String?
+  sourcesUsed String? // JSON string: kb chunk ids + note ids used
+  createdAt  DateTime @default(now())
+}
+
+model MemoryNote {
+  id             String    @id @default(cuid())
+  clientId       String
+  note           String
+  category       String    // event | goal | preference | concern
+  sourceMessageId String?
+  createdAt      DateTime  @default(now())
+  expiryDate     DateTime?
+  sensitivity    String    @default("normal")
+  deleted        Boolean   @default(false)
+}
+
+model Escalation {
+  id                String   @id @default(cuid())
+  clientId          String
+  level             String   // L1 | L2 | L3
+  triggerRuleId     String
+  clientConcern     String
+  conversationSummary String
+  relevantContext   String?
+  whyHumanNeeded    String
+  recommendedOwner  String
+  whatClientWasTold String
+  status            String   @default("open") // open | assigned | in_progress | resolved | closed | reopened
+  assignedTo        String?
+  resolutionNote    String?
+  linkedEscalationId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model BuddyFeedback {
+  id        String   @id @default(cuid())
+  clientId  String
+  question  String
+  response  String
+  createdAt DateTime @default(now())
+}
+
+model TakeoverState {
+  clientId  String   @id
+  active    Boolean  @default(false)
+  setBy     String?
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  clientId  String?
+  actor     String   // "ai" | rm user id
+  action    String   // read | reply | classify | escalate | takeover | memory_write | memory_delete
+  detail    String?
+  createdAt DateTime @default(now())
+}
+
+model KbEntry {
+  id        String   @id @default(cuid())
+  category  String
+  question  String
+  answer    String
+  owner     String
+  reviewDate DateTime?
+  active    Boolean  @default(true)
+}

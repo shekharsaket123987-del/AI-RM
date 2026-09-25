@@ -1,0 +1,109 @@
+// "Source zone" — PRD section 20. In production this would be Google Sheets
+// (section 21) and later the platform DB. Here it's SQLite standing in for
+// that data, and the app only ever talks to it through src/db/sourceDb.ts,
+// which exposes read functions only. Nothing in this app writes to this file
+// except the seed script.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/sourceClient"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL_SOURCE")
+}
+
+model Client {
+  id            String   @id
+  name          String
+  phone         String   @unique
+  age           Int?
+  height        Float?
+  location      String?
+  profession    String?
+  clientType    String   // new | renewal | reference
+  createdAt     DateTime @default(now())
+
+  plan               Plan?
+  counselling        Counselling?
+  dietitianAssignment DietitianAssignment?
+  diets              Diet[]
+  followups          Followup[]
+  feedback           Feedback[]
+  appointments       Appointment[]
+}
+
+model Plan {
+  id            String   @id @default(cuid())
+  clientId      String   @unique
+  client        Client   @relation(fields: [clientId], references: [id])
+  planName      String
+  startDate     DateTime
+  endDate       DateTime
+  status        String   // active | completed | paused
+  paymentStatus String   // paid | pending
+}
+
+model Counselling {
+  id           String   @id @default(cuid())
+  clientId     String   @unique
+  client       Client   @relation(fields: [clientId], references: [id])
+  status       String   // booked | missed | completed
+  scheduledAt  DateTime?
+  completedAt  DateTime?
+  lifestyle    String?
+  goals        String?
+  preferences  String?
+  allergies    String?
+  // Restricted fields — filtered out of the default context bundle (section 19).
+  medicalHistory String?
+  medication     String?
+}
+
+model DietitianAssignment {
+  id        String @id @default(cuid())
+  clientId  String @unique
+  client    Client @relation(fields: [clientId], references: [id])
+  dietitianName String
+}
+
+model Diet {
+  id            String   @id @default(cuid())
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
+  week          Int
+  content       String
+  publishedDate DateTime
+  isCurrent     Boolean  @default(false)
+}
+
+model Followup {
+  id            String   @id @default(cuid())
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
+  date          DateTime
+  status        String   // completed | missed | scheduled
+  weightKg      Float?
+  adherencePct  Int?
+  notes         String?
+  nextFocus     String?
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
+  rating    Int
+  comment   String?
+  date      DateTime
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
+  type      String
+  date      DateTime
+  status    String
+}

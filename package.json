@@ -1,0 +1,16 @@
+{
+  "name": "ai-health-buddy",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "dev:dashboard": "npm run dev --workspace=apps/dashboard",
+    "seed": "npm run seed --workspace=apps/backend",
+    "db:push": "npm run db:push --workspace=apps/backend",
+    "test": "npm run test --workspace=apps/backend"
+  }
+}

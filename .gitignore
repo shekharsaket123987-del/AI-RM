@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.next/
+*.db
+*.db-journal
+.env
+.env.local
+
+# Generated Prisma clients (regenerate with `npm run db:generate`) — includes
+# platform-specific binary query engines that shouldn't be committed.
+apps/backend/src/generated/
