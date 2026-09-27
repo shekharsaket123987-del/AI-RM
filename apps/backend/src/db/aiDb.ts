@@ -166,3 +166,27 @@ export async function createKbEntry(params: {
 export async function setKbEntryActive(id: string, active: boolean) {
   return aiDb.kbEntry.update({ where: { id }, data: { active } });
 }
+
+export async function setChannelIdentity(clientId: string, channel: string, externalId: string) {
+  return aiDb.channelIdentity.upsert({
+    where: { clientId_channel: { clientId, channel } },
+    update: { externalId },
+    create: { clientId, channel, externalId },
+  });
+}
+
+export async function getChannelIdentity(clientId: string, channel: string) {
+  return aiDb.channelIdentity.findUnique({ where: { clientId_channel: { clientId, channel } } });
+}
+
+export async function getProactiveMilestone(clientId: string) {
+  return aiDb.proactiveMilestone.findUnique({ where: { clientId } });
+}
+
+export async function setProactiveMilestone(clientId: string, milestone: string) {
+  return aiDb.proactiveMilestone.upsert({
+    where: { clientId },
+    update: { milestone, notifiedAt: new Date() },
+    create: { clientId, milestone },
+  });
+}

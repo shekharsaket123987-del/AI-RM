@@ -86,3 +86,24 @@ model KbEntry {
   reviewDate DateTime?
   active    Boolean  @default(true)
 }
+
+// Maps a client to their chat identity on a given channel, learned the first
+// time they message in. Needed to send PROACTIVE messages (the client hasn't
+// written in, so there's no inbound webhook payload to reply to).
+model ChannelIdentity {
+  id         String   @id @default(cuid())
+  clientId   String
+  channel    String   // "telegram" | "whatsapp" | "twilio"
+  externalId String   // telegram chat id, etc.
+  updatedAt  DateTime @updatedAt
+
+  @@unique([clientId, channel])
+}
+
+// Tracks the most advanced proactive milestone already messaged to a client,
+// so the hourly scan doesn't re-send the same nudge every hour.
+model ProactiveMilestone {
+  clientId   String   @id
+  milestone  String
+  notifiedAt DateTime @default(now())
+}
